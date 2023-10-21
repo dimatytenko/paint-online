@@ -12,6 +12,7 @@ import Rect from "../tools/Rect";
 import Eraser from "../tools/Eraser";
 import Line from "../tools/Line";
 import Circle from "../tools/Circle";
+import { API_URL, WS_URL } from "../constants/env";
 
 export const Canvas = observer(() => {
   const [inputValue, setInputValue] = useState("");
@@ -26,32 +27,25 @@ export const Canvas = observer(() => {
   useEffect(() => {
     canvasState.setCanvas(canvasRef.current);
     let ctx = canvasRef.current.getContext("2d");
-    axios
-      .get(`http://localhost:5000/image?id=${params.id}`)
-      .then((response) => {
-        const img = new Image();
-        img.src = response.data;
-        img.onload = () => {
-          ctx.clearRect(
-            0,
-            0,
-            canvasRef.current.width,
-            canvasRef.current.height
-          );
-          ctx.drawImage(
-            img,
-            0,
-            0,
-            canvasRef.current.width,
-            canvasRef.current.height
-          );
-        };
-      });
+    axios.get(`${API_URL}/image?id=${params.id}`).then((response) => {
+      const img = new Image();
+      img.src = response.data;
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        ctx.drawImage(
+          img,
+          0,
+          0,
+          canvasRef.current.width,
+          canvasRef.current.height
+        );
+      };
+    });
   }, [params.id]);
 
   useEffect(() => {
     if (canvasState.username) {
-      const socket = new WebSocket(`ws://localhost:5000/`);
+      const socket = new WebSocket(WS_URL);
       canvasState.setSocket(socket);
       canvasState.setSessionId(params.id);
       toolState.setTool(new Brush(canvasRef.current, socket, params.id));
@@ -160,10 +154,9 @@ export const Canvas = observer(() => {
   };
 
   const mouseDownHandler = () => {
-    console.log("pushToUndo");
     canvasState.pushToUndo(canvasRef.current.toDataURL());
     axios
-      .post(`http://localhost:5000/image?id=${params.id}`, {
+      .post(`${API_URL}/image?id=${params.id}`, {
         img: canvasRef.current.toDataURL(),
       })
       .then((response) => console.log(response.data));

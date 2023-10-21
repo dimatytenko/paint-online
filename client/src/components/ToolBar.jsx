@@ -14,11 +14,8 @@ export const ToolBar = observer(() => {
   const changeColor = (e) => {
     toolState.setStrokeColor(e.target.value);
     toolState.setFillColor(e.target.value);
-    console.log("toolState.tool.fillColor", toolState.tool.fillColor);
-    console.log("toolState.tool.strokeColor", toolState.tool.strokeColor);
   };
 
-  console.log("toolState", toolState.fillColor);
   const download = () => {
     const dataUrl = canvasState.canvas.toDataURL();
     const a = document.createElement("a");
